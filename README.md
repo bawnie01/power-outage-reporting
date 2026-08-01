@@ -57,3 +57,27 @@ The Notification Service consumes the event and processes the notification.
 
 ```http
 POST /api/v1/outage-reports
+{
+  "customerCode": "CUST00001",
+  "servicePointCode": "SP00001",
+  "reporterName": "Nguyen Van A",
+  "phoneNumber": "0901234567",
+  "address": "123 Tran Thai Tong, Hanoi",
+  "description": "Power outage in the entire house"
+}
+
+{
+  "id": "ee26f857-220c-46e7-8c99-f66ea9a041ef",
+  "reportCode": "OUT-20260801-00001",
+  "status": "RECEIVED",
+  "message": "The power outage report has been received."
+}
+
+POST /partner/v1/sms-messages
+{
+  "phoneNumber": "0901234567",
+  "templateCode": "OUTAGE_REPORT_RECEIVED",
+  "parameters": {
+    "reportCode": "OUT-20260801-00001"
+  }
+}
