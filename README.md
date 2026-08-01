@@ -136,6 +136,7 @@ Notification Service
 - [Business workflow](docs/business-workflow.md)
 - [Architecture](docs/architecture.md)
 - [Integration patterns](docs/integration-pattern.md)
+- [Event design](docs/event-design.md)
 - [Security design](docs/security.md)
 - [Technical stack](docs/technical-stack.md)
 - [OpenAPI specification](docs/openapi.yaml)
@@ -153,6 +154,15 @@ Start PostgreSQL from the repository root:
 ```powershell
 docker compose up -d postgres
 ```
+
+Start RabbitMQ:
+
+```powershell
+docker compose up -d rabbitmq
+```
+
+RabbitMQ Management is available at `http://localhost:15672` with the local
+development username `outage_user` and password `outage_password`.
 
 Start the Outage Service:
 
@@ -203,6 +213,19 @@ curl.exe -X POST http://localhost:8081/partner/v1/sms-messages `
   -d '{"phoneNumber":"0901234567","templateCode":"OUTAGE_REPORT_RECEIVED","parameters":{"reportCode":"OUT-20260801-00001"}}'
 ```
 
+Start the Notification Service in a third terminal:
+
+```powershell
+cd services/notification-service
+.\mvnw.cmd spring-boot:run
+```
+
+The complete local flow is now:
+
+```text
+Outage Service -> RabbitMQ -> Notification Service -> SMS Partner Mock
+```
+
 ## 15. Project Status
 
 - [x] Define the business domain
@@ -212,7 +235,7 @@ curl.exe -X POST http://localhost:8081/partner/v1/sms-messages `
 - [x] Complete the OpenAPI specification
 - [x] Implement the Outage Service with PostgreSQL persistence
 - [x] Implement the SMS Partner Mock
-- [ ] Add RabbitMQ and the Notification Service
+- [x] Add RabbitMQ and the Notification Service
 - [ ] Add Kong and Keycloak
 - [ ] Deploy to Kubernetes using GitOps
 - [ ] Add Prometheus and Grafana

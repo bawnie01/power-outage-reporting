@@ -16,5 +16,23 @@ services:
       timeout: 3s
       retries: 10
 
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    container_name: power-outage-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: outage_user
+      RABBITMQ_DEFAULT_PASS: outage_password
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - outage-rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
 volumes:
   outage-postgres-data:
+  outage-rabbitmq-data:

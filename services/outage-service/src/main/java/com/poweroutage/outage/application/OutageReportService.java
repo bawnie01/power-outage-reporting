@@ -4,7 +4,10 @@ import com.poweroutage.outage.api.CreateOutageReportRequest;
 import com.poweroutage.outage.common.IdempotencyConflictException;
 import com.poweroutage.outage.domain.OutageReport;
 import com.poweroutage.outage.domain.OutageReportRepository;
+import com.poweroutage.outage.messaging.OutageReportedData;
+import com.poweroutage.outage.messaging.OutageReportedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,16 +29,23 @@ public class OutageReportService {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.BASIC_ISO_DATE;
 
     private final OutageReportRepository repository;
+    private final ApplicationEventPublisher eventPublisher;
     private final Clock clock;
     private final AtomicLong sequence = new AtomicLong();
 
     @Autowired
-    public OutageReportService(OutageReportRepository repository) {
-        this(repository, Clock.system(ZoneOffset.UTC));
+    public OutageReportService(
+            OutageReportRepository repository,
+            ApplicationEventPublisher eventPublisher) {
+        this(repository, eventPublisher, Clock.system(ZoneOffset.UTC));
     }
 
-    OutageReportService(OutageReportRepository repository, Clock clock) {
+    OutageReportService(
+            OutageReportRepository repository,
+            ApplicationEventPublisher eventPublisher,
+            Clock clock) {
         this.repository = repository;
+        this.eventPublisher = eventPublisher;
         this.clock = clock;
     }
 
@@ -50,7 +60,14 @@ public class OutageReportService {
                     }
                     return existing;
                 })
-                .orElseGet(() -> repository.save(new OutageReport(
+                .orElseGet(() -> createAndPublish(idempotencyKey, fingerprint, request));
+    }
+
+    private OutageReport createAndPublish(
+            UUID idempotencyKey,
+            String fingerprint,
+            CreateOutageReportRequest request) {
+        OutageReport report = repository.save(new OutageReport(
                         UUID.randomUUID(),
                         nextReportCode(),
                         idempotencyKey,
@@ -62,7 +79,19 @@ public class OutageReportService {
                         request.address(),
                         request.description(),
                         "RECEIVED",
-                        OffsetDateTime.now(clock))));
+                        OffsetDateTime.now(clock)));
+        eventPublisher.publishEvent(new OutageReportedEvent(
+                UUID.randomUUID(),
+                "outage.reported",
+                "1.0",
+                OffsetDateTime.now(clock),
+                "outage-service",
+                new OutageReportedData(
+                        report.id(),
+                        report.reportCode(),
+                        report.phoneNumber(),
+                        report.status())));
+        return report;
     }
 
     private String nextReportCode() {
