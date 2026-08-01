@@ -20,6 +20,8 @@ This starts:
 | Component | Address |
 |---|---|
 | Customer web interface | `http://localhost:3000` |
+| Grafana | `http://localhost:3001` |
+| Prometheus | `http://localhost:9090` |
 | Kong API Gateway | `http://localhost:8000` |
 | Kong Admin API | `http://localhost:8001` (local inspection only) |
 | SMS Partner Mock | `http://localhost:8081` |
@@ -48,8 +50,13 @@ These credentials are for local development only.
 docker compose ps
 ```
 
-All eight containers should be running. Services with configured health checks
+All ten containers should be running. Services with configured health checks
 should display `healthy`.
+
+Grafana is provisioned automatically with the `Power Outage Platform Overview`
+dashboard and Prometheus datasource. Sign in with `admin` / `admin`. On the
+first login, select **Skip** when Grafana offers to change the local password, then open
+`http://localhost:3001/d/power-outage-overview/power-outage-platform-overview`.
 
 ## Test the Complete Workflow
 

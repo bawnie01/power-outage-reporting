@@ -34,6 +34,24 @@ It contains:
 - JVM heap memory usage by application
 - HTTP 5xx response rate by application
 
+## Local Docker Compose Access
+
+Start the full platform from the repository root:
+
+```powershell
+docker compose up --build -d
+```
+
+Open:
+
+- Prometheus targets: `http://localhost:9090/targets`
+- Grafana: `http://localhost:3001`
+- Provisioned dashboard: `http://localhost:3001/d/power-outage-overview/power-outage-platform-overview`
+
+Use the local Grafana credentials `admin` / `admin`. On the first login, select
+**Skip** when Grafana offers to change the local password. The dashboard and
+Prometheus datasource are loaded automatically from `infrastructure/monitoring`.
+
 ## Local Kubernetes Access
 
 Prometheus and Grafana are internal Kubernetes Services. Access them from a

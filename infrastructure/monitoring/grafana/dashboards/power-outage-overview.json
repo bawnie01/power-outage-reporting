@@ -1,0 +1,90 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Dịch vụ đang hoạt động",
+      "description": "Số lượng Prometheus scrape targets đang UP.",
+      "gridPos": {"h": 7, "w": 6, "x": 0, "y": 0},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "orange", "value": 4}, {"color": "green", "value": 5}]}}},
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}},
+      "targets": [{"expr": "sum(up)", "refId": "A"}]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Báo mất điện đã tiếp nhận",
+      "description": "Tổng số HTTP 201 của API tạo báo mất điện trong thời gian Prometheus lưu dữ liệu.",
+      "gridPos": {"h": 7, "w": 6, "x": 6, "y": 0},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]}}},
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}},
+      "targets": [{"expr": "sum(http_server_requests_seconds_count{application=\"outage-service\",method=\"POST\",status=\"201\"}) or vector(0)", "refId": "A"}]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Tin nhắn trong hàng đợi",
+      "gridPos": {"h": 7, "w": 6, "x": 12, "y": 0},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 1}, {"color": "red", "value": 10}]}}},
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}},
+      "targets": [{"expr": "sum(rabbitmq_queue_messages{queue=\"notification.outage-reported.queue\"}) or vector(0)", "refId": "A"}]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Lỗi HTTP 5xx",
+      "gridPos": {"h": 7, "w": 6, "x": 18, "y": 0},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}}},
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}},
+      "targets": [{"expr": "sum(http_server_requests_seconds_count{status=~\"5..\"}) or vector(0)", "refId": "A"}]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Lưu lượng HTTP theo dịch vụ",
+      "gridPos": {"h": 9, "w": 12, "x": 0, "y": 7},
+      "fieldConfig": {"defaults": {"unit": "reqps"}},
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"expr": "sum by (application) (rate(http_server_requests_seconds_count[2m]))", "legendFormat": "{{application}}", "refId": "A"}]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Độ trễ API trung bình",
+      "gridPos": {"h": 9, "w": 12, "x": 12, "y": 7},
+      "fieldConfig": {"defaults": {"unit": "s"}},
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"expr": "sum by (application) (rate(http_server_requests_seconds_sum[2m])) / sum by (application) (rate(http_server_requests_seconds_count[2m]))", "legendFormat": "{{application}}", "refId": "A"}]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "JVM Heap Memory",
+      "gridPos": {"h": 9, "w": 12, "x": 0, "y": 16},
+      "fieldConfig": {"defaults": {"unit": "bytes"}},
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "showLegend": true}},
+      "targets": [{"expr": "sum by (application) (jvm_memory_used_bytes{area=\"heap\"})", "legendFormat": "{{application}}", "refId": "A"}]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "RabbitMQ Queue Depth",
+      "gridPos": {"h": 9, "w": 12, "x": 12, "y": 16},
+      "fieldConfig": {"defaults": {"unit": "short"}},
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "showLegend": true}},
+      "targets": [{"expr": "rabbitmq_queue_messages", "legendFormat": "{{queue}}", "refId": "A"}]
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 41,
+  "tags": ["power-outage", "local", "evn"],
+  "templating": {"list": []},
+  "time": {"from": "now-30m", "to": "now"},
+  "timezone": "browser",
+  "title": "Power Outage Platform Overview",
+  "uid": "power-outage-overview",
+  "version": 1
+}

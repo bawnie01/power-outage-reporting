@@ -7,11 +7,15 @@ on:
     paths:
       - "services/**"
       - "demo-ui/**"
+      - "compose.yaml"
+      - "infrastructure/monitoring/**"
       - ".github/workflows/build-images.yml"
   pull_request:
     paths:
       - "services/**"
       - "demo-ui/**"
+      - "compose.yaml"
+      - "infrastructure/monitoring/**"
       - ".github/workflows/build-images.yml"
   workflow_dispatch:
 
@@ -19,6 +23,19 @@ permissions:
   contents: read
 
 jobs:
+  validate-monitoring:
+    name: Validate monitoring configuration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Validate Docker Compose
+        run: docker compose config --quiet
+
+      - name: Validate Grafana dashboard JSON
+        run: jq empty infrastructure/monitoring/grafana/dashboards/power-outage-overview.json
+
   test-ui:
     name: Build demo UI
     runs-on: ubuntu-latest

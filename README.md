@@ -206,7 +206,7 @@ and Java dependencies. Wait until all services become healthy:
 docker compose ps
 ```
 
-The platform is ready when the eight containers are running and the services
+The platform is ready when the ten containers are running and the services
 with health checks display `healthy`.
 
 ### 14.4 Open the customer interface
@@ -227,6 +227,7 @@ To test the business workflow:
 3. Wait for the generated report code, such as `OUT-20260801-00001`.
 4. Find the report under **Lịch sử báo mất điện**.
 5. Select **Xem chi tiết** to view the registered customer information.
+6. Open **Giám sát hệ thống** in the navigation bar to view Grafana.
 
 The customer does not need to enter a service-point code. For this mini project,
 the interface automatically uses the customer code as the internal service-point
@@ -237,6 +238,8 @@ identifier required by the API contract.
 | Interface | Address | Local credentials |
 |---|---|---|
 | Customer web interface | `http://localhost:3000` | Automatic demo login |
+| Grafana dashboard | `http://localhost:3001/d/power-outage-overview/power-outage-platform-overview` | `admin` / `admin` |
+| Prometheus targets | `http://localhost:9090/targets` | None |
 | Kong API Gateway | `http://localhost:8000` | JWT required |
 | RabbitMQ Management | `http://localhost:15672` | `outage_user` / `outage_password` |
 | Keycloak Admin | `http://localhost:8083` | `admin` / `admin` |

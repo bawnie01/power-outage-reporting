@@ -12,6 +12,60 @@ services:
       keycloak:
         condition: service_healthy
 
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: power-outage-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=3d
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - outage-prometheus-data:/prometheus
+    depends_on:
+      outage-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
+      sms-partner-mock:
+        condition: service_healthy
+      kong:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/-/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    container_name: power-outage-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./infrastructure/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infrastructure/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - outage-grafana-data:/var/lib/grafana
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/api/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
   outage-service:
     build:
       context: ./services/outage-service
@@ -171,3 +225,5 @@ services:
 volumes:
   outage-postgres-data:
   outage-rabbitmq-data:
+  outage-prometheus-data:
+  outage-grafana-data:
