@@ -10,6 +10,7 @@ resources:
   - keycloak.yaml
   - applications.yaml
   - kong.yaml
+  - monitoring.yaml
 
 configMapGenerator:
   - name: keycloak-realm

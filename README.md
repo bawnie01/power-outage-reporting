@@ -265,4 +265,4 @@ Outage Service -> RabbitMQ -> Notification Service -> SMS Partner Mock
 - [x] Create a separate GitOps repository and Argo CD Application
 - [x] Install Argo CD on a disposable kind cluster and synchronize the application
 - [x] Verify the Kubernetes workflow end to end through Kong and Keycloak
-- [ ] Add Prometheus and Grafana
+- [x] Add Prometheus and Grafana with a provisioned platform dashboard
