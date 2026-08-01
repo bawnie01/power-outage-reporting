@@ -82,6 +82,8 @@ spec:
           env:
             - name: RABBITMQ_HOST
               value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: "5672"
             - name: RABBITMQ_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -174,6 +176,8 @@ spec:
                   key: database-password
             - name: RABBITMQ_HOST
               value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: "5672"
             - name: RABBITMQ_USERNAME
               valueFrom:
                 secretKeyRef:
