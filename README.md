@@ -151,7 +151,7 @@ The simplest option requires only Docker with Docker Compose:
 docker compose up --build -d
 ```
 
-This starts all three application services, PostgreSQL, and RabbitMQ. See the
+This starts all three application services, PostgreSQL, RabbitMQ, and Keycloak. See the
 [local deployment guide](docs/local-deployment.md) for verification and shutdown steps.
 
 To run the Java services outside containers, the requirements are:
@@ -189,8 +189,12 @@ curl.exe http://localhost:8080/actuator/health
 
 Submit a report:
 
+First obtain a token using the instructions in the
+[local deployment guide](docs/local-deployment.md), then run:
+
 ```powershell
 curl.exe -X POST http://localhost:8080/api/v1/outage-reports `
+  -H "Authorization: Bearer $accessToken" `
   -H "Content-Type: application/json" `
   -H "Idempotency-Key: c1203d7d-a58f-45ea-b9ec-469d77b24871" `
   -d '{"customerCode":"CUST00001","servicePointCode":"SP00001","reporterName":"Nguyen Van A","phoneNumber":"0901234567","address":"123 Tran Thai Tong, Hanoi","description":"Power outage in the entire house"}'
@@ -247,6 +251,7 @@ Outage Service -> RabbitMQ -> Notification Service -> SMS Partner Mock
 - [x] Implement the SMS Partner Mock
 - [x] Add RabbitMQ and the Notification Service
 - [x] Containerize all services and run the complete platform with Docker Compose
-- [ ] Add Kong and Keycloak
+- [x] Add Keycloak authentication and role-based authorization
+- [ ] Add Kong API Gateway
 - [ ] Deploy to Kubernetes using GitOps
 - [ ] Add Prometheus and Grafana

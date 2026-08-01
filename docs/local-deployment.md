@@ -25,6 +25,7 @@ This starts:
 | PostgreSQL | `localhost:5432` |
 | RabbitMQ | `localhost:5672` |
 | RabbitMQ Management | `http://localhost:15672` |
+| Keycloak | `http://localhost:8083` |
 
 Local RabbitMQ credentials:
 
@@ -41,12 +42,32 @@ These credentials are for local development only.
 docker compose ps
 ```
 
-All five containers should display `healthy`.
+All six containers should display `healthy`.
 
 ## Test the Complete Workflow
 
+Obtain a CUSTOMER access token:
+
+```powershell
+$tokenResponse = Invoke-RestMethod `
+  -Method Post `
+  -Uri "http://localhost:8083/realms/power-outage/protocol/openid-connect/token" `
+  -ContentType "application/x-www-form-urlencoded" `
+  -Body @{
+    grant_type = "password"
+    client_id  = "power-outage-api"
+    username   = "customer01"
+    password   = "customer123"
+  }
+
+$accessToken = $tokenResponse.access_token
+```
+
+Submit an authenticated outage report:
+
 ```powershell
 curl.exe -X POST http://localhost:8080/api/v1/outage-reports `
+  -H "Authorization: Bearer $accessToken" `
   -H "Content-Type: application/json" `
   -H "Idempotency-Key: c1203d7d-a58f-45ea-b9ec-469d77b24871" `
   -H "X-Correlation-Id: a7a5a3ee-1a43-40aa-a285-ed13bc822612" `
@@ -59,6 +80,8 @@ Expected result:
 HTTP 201 Created
 status: RECEIVED
 ```
+
+Calling the endpoint without the `Authorization` header returns `401 Unauthorized`.
 
 Verify the notification:
 

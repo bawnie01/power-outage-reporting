@@ -11,12 +11,16 @@ services:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_USERNAME: outage_user
       RABBITMQ_PASSWORD: outage_password
+      KEYCLOAK_ISSUER_URI: http://localhost:8083/realms/power-outage
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/power-outage/protocol/openid-connect/certs
     ports:
       - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      keycloak:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/actuator/health"]
@@ -65,6 +69,26 @@ services:
       timeout: 5s
       retries: 12
       start_period: 15s
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.7.0
+    container_name: power-outage-keycloak
+    command: ["start-dev", "--import-realm", "--health-enabled=true"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8083:8080"
+    volumes:
+      - ./infrastructure/keycloak/power-outage-realm.json:/opt/keycloak/data/import/power-outage-realm.json:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "bash -c 'exec 3<>/dev/tcp/127.0.0.1/9000; printf \"GET /health/ready HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n\" >&3; grep -q \"200 OK\" <&3'"
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
 
   postgres:
     image: postgres:17-alpine
