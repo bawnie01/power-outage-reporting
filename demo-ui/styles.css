@@ -1,0 +1,16 @@
+:root { font-family: Inter, Segoe UI, sans-serif; color: #17233b; background: #f4f7fb; }
+* { box-sizing: border-box; } body { margin: 0; }
+.shell { max-width: 1050px; margin: 0 auto; padding: 42px 20px 70px; }
+header, .login-card, .section-heading, .actions { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+h1 { margin: 4px 0 8px; font-size: clamp(2rem, 5vw, 3.3rem); letter-spacing: -.04em; } h2 { margin: 0 0 20px; font-size: 1.2rem; }
+.eyebrow { color: #196b55; text-transform: uppercase; letter-spacing: .12em; font-weight: 700; font-size: .78rem; }
+.subtitle, .login-card p { color: #62708a; margin: 0; }
+.card { background: white; margin-top: 24px; padding: 26px; border-radius: 18px; box-shadow: 0 10px 35px rgba(41,55,86,.08); } .login-card h2 { margin-bottom: 6px; }
+.status { padding: 10px 16px; border-radius: 999px; font-weight: 700; white-space: nowrap; } .waiting { color: #805b00; background: #fff4cf; } .connected { color: #126044; background: #dff6ed; } .error { color: #9b2c2c; background: #fee2e2; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; } label { display: grid; gap: 7px; font-weight: 650; font-size: .9rem; } .wide { grid-column: 1 / -1; }
+input, textarea { width: 100%; padding: 12px 14px; border: 1px solid #d8dfeb; border-radius: 10px; font: inherit; color: inherit; } input:focus, textarea:focus { outline: 3px solid #d9f2ea; border-color: #26866c; }
+button { border: 0; border-radius: 10px; padding: 12px 18px; background: #176b55; color: white; font: inherit; font-weight: 700; cursor: pointer; } button:hover { background: #105542; } button:disabled { opacity: .5; cursor: not-allowed; }
+.secondary { background: #e8f1ee; color: #176b55; } .actions { justify-content: flex-start; margin-top: 20px; color: #176b55; font-weight: 650; }
+.table-wrap { overflow-x: auto; } table { width: 100%; border-collapse: collapse; } th, td { text-align: left; padding: 13px 10px; border-bottom: 1px solid #edf0f5; } th { color: #68758d; font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; }
+.badge { display: inline-block; padding: 5px 9px; border-radius: 999px; color: #176b55; background: #e2f5ef; font-size: .78rem; font-weight: 800; } .empty { text-align: center; color: #7a879d; padding: 28px; } .error-text { color: #b42318; }
+@media (max-width: 650px) { header, .login-card { align-items: flex-start; flex-direction: column; } .grid { grid-template-columns: 1fr; } .wide { grid-column: auto; } }

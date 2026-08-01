@@ -170,7 +170,10 @@ The simplest option requires only Docker with Docker Compose:
 docker compose up --build -d
 ```
 
-This starts all three application services, PostgreSQL, RabbitMQ, Keycloak, and Kong. See the
+Open `http://localhost:3000` to use the browser demo. It signs in through
+Keycloak with the demo operator account and sends protected requests through Kong.
+
+This starts the demo interface, all three application services, PostgreSQL, RabbitMQ, Keycloak, and Kong. See the
 [local deployment guide](docs/local-deployment.md) for verification and shutdown steps.
 
 To run the Java services outside containers, the requirements are:

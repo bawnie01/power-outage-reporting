@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Power Outage Reporting</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div><p class="eyebrow">Electric Utility Demo</p><h1>Power Outage Reporting</h1><p class="subtitle">Submit and track customer outage reports.</p></div>
+      <div id="connection" class="status waiting">Connecting...</div>
+    </header>
+    <section class="card login-card">
+      <div><h2>Demo operator</h2><p>The interface signs in through Keycloak before calling the protected API.</p></div>
+      <button id="loginButton" type="button">Connect to system</button>
+    </section>
+    <section class="card">
+      <h2>New outage report</h2>
+      <form id="reportForm">
+        <div class="grid">
+          <label>Customer code<input name="customerCode" value="CUST00001" required></label>
+          <label>Service point code<input name="servicePointCode" value="SP00001" required></label>
+          <label>Reporter name<input name="reporterName" value="Nguyen Van A" required></label>
+          <label>Phone number<input name="phoneNumber" value="0901234567" required></label>
+          <label class="wide">Address<input name="address" value="123 Tran Thai Tong, Hanoi" required></label>
+          <label class="wide">Description<textarea name="description" rows="3">Power outage in the entire house</textarea></label>
+        </div>
+        <div class="actions"><button id="submitButton" type="submit" disabled>Submit outage report</button><span id="formMessage"></span></div>
+      </form>
+    </section>
+    <section class="card">
+      <div class="section-heading"><h2>Recent reports</h2><button id="refreshButton" class="secondary" type="button" disabled>Refresh</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Report code</th><th>Customer</th><th>Service point</th><th>Status</th><th>Created</th></tr></thead><tbody id="reportRows"><tr><td colspan="5" class="empty">Connect to load reports.</td></tr></tbody></table></div>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
