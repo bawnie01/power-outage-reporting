@@ -6,10 +6,12 @@ on:
       - main
     paths:
       - "services/**"
+      - "demo-ui/**"
       - ".github/workflows/build-images.yml"
   pull_request:
     paths:
       - "services/**"
+      - "demo-ui/**"
       - ".github/workflows/build-images.yml"
   workflow_dispatch:
 
@@ -17,6 +19,16 @@ permissions:
   contents: read
 
 jobs:
+  test-ui:
+    name: Build demo UI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Build browser interface image
+        run: docker build --tag power-outage/demo-ui:ci demo-ui
+
   test:
     name: Test ${{ matrix.service }}
     runs-on: ubuntu-latest
