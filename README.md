@@ -142,6 +142,7 @@ Notification Service
 - [OpenAPI specification](docs/openapi.yaml)
 - [SMS Partner Mock OpenAPI specification](docs/sms-partner-openapi.yaml)
 - [Local deployment guide](docs/local-deployment.md)
+- [API Gateway design](docs/api-gateway.md)
 
 ## 14. Run the Current Version Locally
 
@@ -151,7 +152,7 @@ The simplest option requires only Docker with Docker Compose:
 docker compose up --build -d
 ```
 
-This starts all three application services, PostgreSQL, RabbitMQ, and Keycloak. See the
+This starts all three application services, PostgreSQL, RabbitMQ, Keycloak, and Kong. See the
 [local deployment guide](docs/local-deployment.md) for verification and shutdown steps.
 
 To run the Java services outside containers, the requirements are:
@@ -193,7 +194,7 @@ First obtain a token using the instructions in the
 [local deployment guide](docs/local-deployment.md), then run:
 
 ```powershell
-curl.exe -X POST http://localhost:8080/api/v1/outage-reports `
+curl.exe -X POST http://localhost:8000/api/v1/outage-reports `
   -H "Authorization: Bearer $accessToken" `
   -H "Content-Type: application/json" `
   -H "Idempotency-Key: c1203d7d-a58f-45ea-b9ec-469d77b24871" `
@@ -252,6 +253,6 @@ Outage Service -> RabbitMQ -> Notification Service -> SMS Partner Mock
 - [x] Add RabbitMQ and the Notification Service
 - [x] Containerize all services and run the complete platform with Docker Compose
 - [x] Add Keycloak authentication and role-based authorization
-- [ ] Add Kong API Gateway
+- [x] Add Kong API Gateway
 - [ ] Deploy to Kubernetes using GitOps
 - [ ] Add Prometheus and Grafana

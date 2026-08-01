@@ -19,7 +19,8 @@ This starts:
 
 | Component | Address |
 |---|---|
-| Outage Service | `http://localhost:8080` |
+| Kong API Gateway | `http://localhost:8000` |
+| Kong Admin API | `http://localhost:8001` (local inspection only) |
 | SMS Partner Mock | `http://localhost:8081` |
 | Notification Service | `http://localhost:8082` |
 | PostgreSQL | `localhost:5432` |
@@ -42,7 +43,7 @@ These credentials are for local development only.
 docker compose ps
 ```
 
-All six containers should display `healthy`.
+All seven containers should display `healthy`.
 
 ## Test the Complete Workflow
 
@@ -66,7 +67,7 @@ $accessToken = $tokenResponse.access_token
 Submit an authenticated outage report:
 
 ```powershell
-curl.exe -X POST http://localhost:8080/api/v1/outage-reports `
+curl.exe -i -X POST http://localhost:8000/api/v1/outage-reports `
   -H "Authorization: Bearer $accessToken" `
   -H "Content-Type: application/json" `
   -H "Idempotency-Key: c1203d7d-a58f-45ea-b9ec-469d77b24871" `
@@ -79,9 +80,11 @@ Expected result:
 ```text
 HTTP 201 Created
 status: RECEIVED
+X-Correlation-Id response header
 ```
 
 Calling the endpoint without the `Authorization` header returns `401 Unauthorized`.
+The Outage Service port is not published to the host; public requests must pass through Kong.
 
 Verify the notification:
 
