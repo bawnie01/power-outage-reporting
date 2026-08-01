@@ -8,6 +8,18 @@ After receiving the report, the system stores the information, publishes an even
 
 This project uses simulated data only and does not connect to real EVN systems.
 
+## Related Repositories
+
+This project is delivered through two repositories:
+
+| Repository | Purpose |
+|---|---|
+| [power-outage-reporting](https://github.com/bawnie01/power-outage-reporting) | Application source code, API contracts, documentation, Docker Compose, Kubernetes manifests, and CI workflow |
+| [power-outage-reporting-gitops](https://github.com/bawnie01/power-outage-reporting-gitops) | GitOps desired state, immutable image tags, and the Argo CD Application |
+
+Start with this repository for the design and implementation. Use the GitOps
+repository to review how Argo CD deploys the tested application images.
+
 ## 2. Business Domain
 
 Electric utility customer service.
