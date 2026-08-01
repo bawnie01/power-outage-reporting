@@ -1,0 +1,114 @@
+openapi: 3.0.3
+
+info:
+  title: SMS Partner Mock API
+  version: 1.0.0
+  description: Simulated partner API for SMS notification testing.
+
+servers:
+  - url: http://localhost:8081/partner/v1
+    description: Local SMS Partner Mock
+
+paths:
+  /sms-messages:
+    post:
+      summary: Send a simulated SMS message
+      operationId: sendSmsMessage
+      parameters:
+        - name: X-Mock-Scenario
+          in: header
+          required: false
+          description: Selects the simulated partner behavior.
+          schema:
+            type: string
+            enum: [success, timeout, server-error]
+            default: success
+        - name: X-Correlation-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendSmsRequest"
+            example:
+              phoneNumber: "0901234567"
+              templateCode: OUTAGE_REPORT_RECEIVED
+              parameters:
+                reportCode: OUT-20260801-00001
+      responses:
+        "202":
+          description: The simulated SMS request was accepted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendSmsResponse"
+              example:
+                messageId: SMS-20260801-00001
+                status: ACCEPTED
+                acceptedAt: "2026-08-01T09:30:05+07:00"
+        "400":
+          description: The request or mock scenario is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartnerErrorResponse"
+        "503":
+          description: Simulated partner server failure.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartnerErrorResponse"
+
+components:
+  schemas:
+    SendSmsRequest:
+      type: object
+      additionalProperties: false
+      required: [phoneNumber, templateCode, parameters]
+      properties:
+        phoneNumber:
+          type: string
+          pattern: "^(0|\\+84)[0-9]{9}$"
+        templateCode:
+          type: string
+          maxLength: 100
+        parameters:
+          type: object
+          additionalProperties:
+            type: string
+    SendSmsResponse:
+      type: object
+      required: [messageId, status, acceptedAt]
+      properties:
+        messageId:
+          type: string
+        status:
+          type: string
+          enum: [ACCEPTED]
+        acceptedAt:
+          type: string
+          format: date-time
+    PartnerErrorResponse:
+      type: object
+      required: [timestamp, status, code, message, path]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+        path:
+          type: string

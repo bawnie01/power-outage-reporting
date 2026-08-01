@@ -139,6 +139,7 @@ Notification Service
 - [Security design](docs/security.md)
 - [Technical stack](docs/technical-stack.md)
 - [OpenAPI specification](docs/openapi.yaml)
+- [SMS Partner Mock OpenAPI specification](docs/sms-partner-openapi.yaml)
 
 ## 14. Run the Current Version Locally
 
@@ -177,6 +178,31 @@ curl.exe -X POST http://localhost:8080/api/v1/outage-reports `
 
 The credentials in `compose.yaml` are for local development only.
 
+Start the SMS Partner Mock in a second terminal:
+
+```powershell
+cd services/sms-partner-mock
+.\mvnw.cmd spring-boot:run
+```
+
+The partner mock runs at `http://localhost:8081`. Select its behavior with the
+`X-Mock-Scenario` header:
+
+```text
+success       Returns 202 Accepted immediately
+timeout       Waits five seconds before returning 202 Accepted
+server-error  Returns 503 Service Unavailable
+```
+
+Example success request:
+
+```powershell
+curl.exe -X POST http://localhost:8081/partner/v1/sms-messages `
+  -H "Content-Type: application/json" `
+  -H "X-Mock-Scenario: success" `
+  -d '{"phoneNumber":"0901234567","templateCode":"OUTAGE_REPORT_RECEIVED","parameters":{"reportCode":"OUT-20260801-00001"}}'
+```
+
 ## 15. Project Status
 
 - [x] Define the business domain
@@ -185,7 +211,7 @@ The credentials in `compose.yaml` are for local development only.
 - [x] Define the technical stack
 - [x] Complete the OpenAPI specification
 - [x] Implement the Outage Service with PostgreSQL persistence
-- [ ] Implement the SMS Partner Mock
+- [x] Implement the SMS Partner Mock
 - [ ] Add RabbitMQ and the Notification Service
 - [ ] Add Kong and Keycloak
 - [ ] Deploy to Kubernetes using GitOps
