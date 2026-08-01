@@ -4,14 +4,19 @@ import com.poweroutage.outage.api.CreateOutageReportRequest;
 import com.poweroutage.outage.common.IdempotencyConflictException;
 import com.poweroutage.outage.domain.OutageReport;
 import com.poweroutage.outage.domain.OutageReportRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
+import java.util.HexFormat;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -24,6 +29,7 @@ public class OutageReportService {
     private final Clock clock;
     private final AtomicLong sequence = new AtomicLong();
 
+    @Autowired
     public OutageReportService(OutageReportRepository repository) {
         this(repository, Clock.system(ZoneOffset.UTC));
     }
@@ -33,14 +39,9 @@ public class OutageReportService {
         this.clock = clock;
     }
 
+    @Transactional
     public OutageReport create(UUID idempotencyKey, CreateOutageReportRequest request) {
-        String fingerprint = Integer.toHexString(Objects.hash(
-                request.customerCode(),
-                request.servicePointCode(),
-                request.reporterName(),
-                request.phoneNumber(),
-                request.address(),
-                request.description()));
+        String fingerprint = fingerprint(request);
 
         return repository.findByIdempotencyKey(idempotencyKey)
                 .map(existing -> {
@@ -68,5 +69,22 @@ public class OutageReportService {
         return "OUT-%s-%05d".formatted(
                 LocalDate.now(clock).format(DATE_FORMAT),
                 sequence.incrementAndGet());
+    }
+
+    private String fingerprint(CreateOutageReportRequest request) {
+        String canonicalRequest = String.join("\u001f",
+                request.customerCode(),
+                request.servicePointCode(),
+                request.reporterName(),
+                request.phoneNumber(),
+                request.address(),
+                request.description() == null ? "" : request.description());
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256")
+                    .digest(canonicalRequest.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(digest);
+        } catch (NoSuchAlgorithmException exception) {
+            throw new IllegalStateException("SHA-256 is not available", exception);
+        }
     }
 }

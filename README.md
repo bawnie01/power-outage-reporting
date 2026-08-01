@@ -140,14 +140,51 @@ Notification Service
 - [Technical stack](docs/technical-stack.md)
 - [OpenAPI specification](docs/openapi.yaml)
 
-## 14. Project Status
+## 14. Run the Current Version Locally
+
+Requirements:
+
+- Java 21
+- Docker with Docker Compose
+
+Start PostgreSQL from the repository root:
+
+```powershell
+docker compose up -d postgres
+```
+
+Start the Outage Service:
+
+```powershell
+cd services/outage-service
+.\mvnw.cmd spring-boot:run
+```
+
+Check its health:
+
+```powershell
+curl.exe http://localhost:8080/actuator/health
+```
+
+Submit a report:
+
+```powershell
+curl.exe -X POST http://localhost:8080/api/v1/outage-reports `
+  -H "Content-Type: application/json" `
+  -H "Idempotency-Key: c1203d7d-a58f-45ea-b9ec-469d77b24871" `
+  -d '{"customerCode":"CUST00001","servicePointCode":"SP00001","reporterName":"Nguyen Van A","phoneNumber":"0901234567","address":"123 Tran Thai Tong, Hanoi","description":"Power outage in the entire house"}'
+```
+
+The credentials in `compose.yaml` are for local development only.
+
+## 15. Project Status
 
 - [x] Define the business domain
 - [x] Define the business workflow
 - [x] Define the integration patterns
 - [x] Define the technical stack
 - [x] Complete the OpenAPI specification
-- [ ] Implement the Outage Service
+- [x] Implement the Outage Service with PostgreSQL persistence
 - [ ] Implement the SMS Partner Mock
 - [ ] Add RabbitMQ and the Notification Service
 - [ ] Add Kong and Keycloak
