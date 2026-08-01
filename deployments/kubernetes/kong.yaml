@@ -43,7 +43,7 @@ spec:
               value: "2"
           readinessProbe:
             httpGet:
-              path: /status/ready
+              path: /status
               port: admin
             initialDelaySeconds: 10
             periodSeconds: 10
