@@ -39,18 +39,24 @@ spec:
               value: /dev/stderr
             - name: KONG_ADMIN_LISTEN
               value: 0.0.0.0:8001
+            - name: KONG_NGINX_WORKER_PROCESSES
+              value: "2"
           readinessProbe:
             httpGet:
               path: /status/ready
               port: admin
             initialDelaySeconds: 10
             periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
           livenessProbe:
             httpGet:
               path: /status
               port: admin
             initialDelaySeconds: 20
             periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 6
           resources:
             requests:
               cpu: 100m
@@ -82,4 +88,3 @@ spec:
     - name: admin
       port: 8001
       targetPort: admin
-
