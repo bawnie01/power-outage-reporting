@@ -146,7 +146,7 @@ Notification Service
 - [x] Define the business workflow
 - [x] Define the integration patterns
 - [x] Define the technical stack
-- [ ] Complete the OpenAPI specification
+- [x] Complete the OpenAPI specification
 - [ ] Implement the Outage Service
 - [ ] Implement the SMS Partner Mock
 - [ ] Add RabbitMQ and the Notification Service
