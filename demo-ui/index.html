@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <div class="notice">Hệ thống mô phỏng phục vụ học tập — không phải website chính thức của EVN</div>
   <nav class="topbar">
     <div class="nav-inner">
       <a class="brand" href="#">
@@ -42,7 +41,6 @@
       <form id="reportForm">
         <div class="grid">
           <label>Mã khách hàng <span>*</span><input name="customerCode" value="CUST00001" required></label>
-          <label>Mã điểm sử dụng điện <span>*</span><input name="servicePointCode" value="SP00001" required></label>
           <label>Họ và tên người báo <span>*</span><input name="reporterName" value="Nguyễn Văn A" required></label>
           <label>Số điện thoại <span>*</span><input name="phoneNumber" value="0901234567" required></label>
           <label class="wide">Địa chỉ xảy ra mất điện <span>*</span><input name="address" value="123 Trần Thái Tông, Hà Nội" required></label>
@@ -54,7 +52,7 @@
 
     <section id="history" class="card">
       <div class="section-heading"><div><p class="eyebrow">THEO DÕI YÊU CẦU</p><h2>Lịch sử báo mất điện</h2></div><button id="refreshButton" class="secondary" type="button" disabled>Làm mới</button></div>
-      <div class="table-wrap"><table><thead><tr><th>Mã báo cáo</th><th>Khách hàng</th><th>Điểm dùng điện</th><th>Trạng thái</th><th>Thời gian tạo</th><th></th></tr></thead><tbody id="reportRows"><tr><td colspan="6" class="empty">Đang kết nối hệ thống...</td></tr></tbody></table></div>
+      <div class="table-wrap"><table><thead><tr><th>Mã báo cáo</th><th>Khách hàng</th><th>Trạng thái</th><th>Thời gian tạo</th><th></th></tr></thead><tbody id="reportRows"><tr><td colspan="5" class="empty">Đang kết nối hệ thống...</td></tr></tbody></table></div>
     </section>
   </main>
 
@@ -63,15 +61,15 @@
       <div class="modal-heading"><div><p class="eyebrow">CHI TIẾT YÊU CẦU</p><h2 id="detailTitle">Thông tin khách hàng</h2></div><button id="closeModal" class="icon-button" type="button" aria-label="Đóng">×</button></div>
       <dl class="detail-grid">
         <div><dt>Mã báo cáo</dt><dd id="detailReportCode"></dd></div><div><dt>Trạng thái</dt><dd id="detailStatus"></dd></div>
-        <div><dt>Mã khách hàng</dt><dd id="detailCustomerCode"></dd></div><div><dt>Điểm dùng điện</dt><dd id="detailServicePoint"></dd></div>
-        <div><dt>Người báo</dt><dd id="detailReporter"></dd></div><div><dt>Số điện thoại</dt><dd id="detailPhone"></dd></div>
+        <div><dt>Mã khách hàng</dt><dd id="detailCustomerCode"></dd></div><div><dt>Người báo</dt><dd id="detailReporter"></dd></div>
+        <div><dt>Số điện thoại</dt><dd id="detailPhone"></dd></div>
         <div class="full"><dt>Địa chỉ</dt><dd id="detailAddress"></dd></div><div class="full"><dt>Mô tả tình trạng</dt><dd id="detailDescription"></dd></div>
         <div class="full"><dt>Thời gian tiếp nhận</dt><dd id="detailCreatedAt"></dd></div>
       </dl>
     </div>
   </div>
 
-  <footer><div><img src="/assets/evn-logo.png" alt="EVN"><p>Mini project: Power Outage Reporting System</p></div><p>Dữ liệu hoàn toàn mô phỏng và không kết nối hệ thống điện lực thực tế.</p></footer>
+  <footer><div><img src="/assets/evn-logo.png" alt="EVN"><p>Trung tâm Chăm sóc khách hàng Điện lực</p></div><p>Hỗ trợ dịch vụ điện trực tuyến 24/7</p></footer>
   <script src="/app.js"></script>
 </body>
 </html>

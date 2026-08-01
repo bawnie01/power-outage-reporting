@@ -164,104 +164,179 @@ GitOps repository: [bawnie01/power-outage-reporting-gitops](https://github.com/b
 
 ## 14. Run the Current Version Locally
 
-The simplest option requires only Docker with Docker Compose:
+This is the recommended path for first-time users. Java and Maven are not
+required because Docker builds and runs every component.
+
+### 14.1 Prerequisites
+
+Install and start:
+
+- [Git](https://git-scm.com/downloads)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+Docker Desktop must show **Engine running**. Verify the installation in
+PowerShell:
+
+```powershell
+git --version
+docker --version
+docker compose version
+```
+
+### 14.2 Download the project
+
+```powershell
+git clone https://github.com/bawnie01/power-outage-reporting.git
+cd power-outage-reporting
+```
+
+If the repository was downloaded as a ZIP file, extract it, open PowerShell in
+the extracted `power-outage-reporting` directory, and continue below.
+
+### 14.3 Start the complete platform
 
 ```powershell
 docker compose up --build -d
 ```
 
-Open `http://localhost:3000` to use the browser demo. It signs in through
-Keycloak with the demo operator account and sends protected requests through Kong.
-
-This starts the demo interface, all three application services, PostgreSQL, RabbitMQ, Keycloak, and Kong. See the
-[local deployment guide](docs/local-deployment.md) for verification and shutdown steps.
-
-To run the Java services outside containers, the requirements are:
-
-- Java 21
-- Docker with Docker Compose
-
-Start PostgreSQL from the repository root:
+The first build may take several minutes because Docker downloads base images
+and Java dependencies. Wait until all services become healthy:
 
 ```powershell
-docker compose up -d postgres
+docker compose ps
 ```
 
-Start RabbitMQ:
+The platform is ready when the eight containers are running and the services
+with health checks display `healthy`.
 
-```powershell
-docker compose up -d rabbitmq
-```
+### 14.4 Open the customer interface
 
-RabbitMQ Management is available at `http://localhost:15672` with the local
-development username `outage_user` and password `outage_password`.
-
-Start the Outage Service:
-
-```powershell
-cd services/outage-service
-.\mvnw.cmd spring-boot:run
-```
-
-Check its health:
-
-```powershell
-curl.exe http://localhost:8080/actuator/health
-```
-
-Submit a report:
-
-First obtain a token using the instructions in the
-[local deployment guide](docs/local-deployment.md), then run:
-
-```powershell
-curl.exe -X POST http://localhost:8000/api/v1/outage-reports `
-  -H "Authorization: Bearer $accessToken" `
-  -H "Content-Type: application/json" `
-  -H "Idempotency-Key: c1203d7d-a58f-45ea-b9ec-469d77b24871" `
-  -d '{"customerCode":"CUST00001","servicePointCode":"SP00001","reporterName":"Nguyen Van A","phoneNumber":"0901234567","address":"123 Tran Thai Tong, Hanoi","description":"Power outage in the entire house"}'
-```
-
-The credentials in `compose.yaml` are for local development only.
-
-Start the SMS Partner Mock in a second terminal:
-
-```powershell
-cd services/sms-partner-mock
-.\mvnw.cmd spring-boot:run
-```
-
-The partner mock runs at `http://localhost:8081`. Select its behavior with the
-`X-Mock-Scenario` header:
+Open this address in a browser:
 
 ```text
-success       Returns 202 Accepted immediately
-timeout       Waits five seconds before returning 202 Accepted
-server-error  Returns 503 Service Unavailable
+http://localhost:3000
 ```
 
-Example success request:
+The page signs in automatically with the local demo operator account through
+Keycloak. Wait for **Hệ thống hoạt động** in the top-right corner.
+
+To test the business workflow:
+
+1. Enter the customer code, reporter name, phone number, address, and outage description.
+2. Select **Gửi báo mất điện**.
+3. Wait for the generated report code, such as `OUT-20260801-00001`.
+4. Find the report under **Lịch sử báo mất điện**.
+5. Select **Xem chi tiết** to view the registered customer information.
+
+The customer does not need to enter a service-point code. For this mini project,
+the interface automatically uses the customer code as the internal service-point
+identifier required by the API contract.
+
+### 14.5 Local service addresses
+
+| Interface | Address | Local credentials |
+|---|---|---|
+| Customer web interface | `http://localhost:3000` | Automatic demo login |
+| Kong API Gateway | `http://localhost:8000` | JWT required |
+| RabbitMQ Management | `http://localhost:15672` | `outage_user` / `outage_password` |
+| Keycloak Admin | `http://localhost:8083` | `admin` / `admin` |
+| SMS Partner Mock | `http://localhost:8081` | API key used internally |
+| Notification health | `http://localhost:8082/actuator/health` | None |
+
+Local demo users imported into Keycloak:
+
+| User | Password | Role |
+|---|---|---|
+| `customer01` | `customer123` | `CUSTOMER` |
+| `operator01` | `operator123` | `OPERATOR` |
+
+All credentials are for local development only.
+
+### 14.6 Verify the complete integration flow
+
+After submitting a report from the interface, verify the notification consumer:
 
 ```powershell
-curl.exe -X POST http://localhost:8081/partner/v1/sms-messages `
-  -H "Content-Type: application/json" `
-  -H "X-Partner-Api-Key: local-demo-partner-key" `
-  -H "X-Mock-Scenario: success" `
-  -d '{"phoneNumber":"0901234567","templateCode":"OUTAGE_REPORT_RECEIVED","parameters":{"reportCode":"OUT-20260801-00001"}}'
+docker compose logs --tail 50 notification-service
 ```
 
-Start the Notification Service in a third terminal:
-
-```powershell
-cd services/notification-service
-.\mvnw.cmd spring-boot:run
-```
-
-The complete local flow is now:
+Look for:
 
 ```text
-Outage Service -> RabbitMQ -> Notification Service -> SMS Partner Mock
+SMS notification accepted
 ```
+
+The successful flow is:
+
+```text
+Browser UI -> Keycloak -> Kong -> Outage Service -> PostgreSQL
+                                           |
+                                           v
+                                        RabbitMQ
+                                           |
+                                           v
+                              Notification Service -> SMS Partner Mock
+```
+
+### 14.7 Stop, restart, or update
+
+Stop the platform while retaining local reports and RabbitMQ data:
+
+```powershell
+docker compose down
+```
+
+Start it again:
+
+```powershell
+docker compose up -d
+```
+
+Download the latest source and rebuild:
+
+```powershell
+git pull
+docker compose up --build -d
+```
+
+To reset all local project data and start with an empty database, run the
+following only when the stored reports are no longer needed:
+
+```powershell
+docker compose down --volumes
+docker compose up --build -d
+```
+
+### 14.8 Troubleshooting
+
+**The page shows `Không thể đăng nhập Keycloak`:**
+
+```powershell
+docker compose ps
+docker compose logs --tail 100 keycloak demo-ui
+docker compose up --build -d
+```
+
+Then reload `http://localhost:3000` with `Ctrl+F5`.
+
+**A container is not healthy:**
+
+```powershell
+docker compose logs --tail 100 <service-name>
+```
+
+Replace `<service-name>` with `outage-service`, `keycloak`, `kong`,
+`notification-service`, `sms-partner-mock`, `postgres`, or `rabbitmq`.
+
+**A port is already in use:** stop the other program using ports `3000`, `5432`,
+`8000`, `8001`, `8081`, `8082`, `8083`, `5672`, or `15672`, then run
+`docker compose up -d` again.
+
+**The browser displays an old interface:** press `Ctrl+F5`, or open a private
+browsing window at `http://localhost:3000`.
+
+For API-level testing, operational verification, and shutdown details, see the
+[local deployment guide](docs/local-deployment.md).
 
 ## 15. Project Status
 

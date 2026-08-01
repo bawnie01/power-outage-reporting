@@ -19,6 +19,7 @@ This starts:
 
 | Component | Address |
 |---|---|
+| Customer web interface | `http://localhost:3000` |
 | Kong API Gateway | `http://localhost:8000` |
 | Kong Admin API | `http://localhost:8001` (local inspection only) |
 | SMS Partner Mock | `http://localhost:8081` |
@@ -27,6 +28,10 @@ This starts:
 | RabbitMQ | `localhost:5672` |
 | RabbitMQ Management | `http://localhost:15672` |
 | Keycloak | `http://localhost:8083` |
+
+The browser interface automatically signs in with the local `operator01` demo
+account. Wait for **Hệ thống hoạt động**, submit a report, and select **Xem chi
+tiết** in the history table to inspect the registered customer information.
 
 Local RabbitMQ credentials:
 
@@ -43,7 +48,8 @@ These credentials are for local development only.
 docker compose ps
 ```
 
-All seven containers should display `healthy`.
+All eight containers should be running. Services with configured health checks
+should display `healthy`.
 
 ## Test the Complete Workflow
 

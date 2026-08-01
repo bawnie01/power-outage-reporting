@@ -1,6 +1,5 @@
 :root { font-family: "Segoe UI", Arial, sans-serif; color: #17324d; background: #f4f7fa; --blue:#0068a9; --deep:#004878; --orange:#f7941d; }
 * { box-sizing: border-box; } html { scroll-behavior: smooth; } body { margin: 0; }
-.notice { background:#f7941d; color:#fff; text-align:center; padding:7px 15px; font-size:.78rem; font-weight:650; }
 .topbar { background:#fff; box-shadow:0 2px 12px rgba(0,50,90,.1); position:sticky; top:0; z-index:10; }
 .nav-inner { max-width:1160px; margin:auto; height:76px; padding:0 20px; display:flex; align-items:center; justify-content:space-between; gap:28px; }
 .brand { display:flex; align-items:center; text-decoration:none; } .brand img { display:block; width:220px; max-height:58px; object-fit:contain; object-position:left center; }
