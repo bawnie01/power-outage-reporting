@@ -1,4 +1,71 @@
 services:
+  outage-service:
+    build:
+      context: ./services/outage-service
+    image: power-outage/outage-service:local
+    container_name: power-outage-outage-service
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/outage_db
+      DATABASE_USERNAME: outage_user
+      DATABASE_PASSWORD: outage_password
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: outage_user
+      RABBITMQ_PASSWORD: outage_password
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  notification-service:
+    build:
+      context: ./services/notification-service
+    image: power-outage/notification-service:local
+    container_name: power-outage-notification-service
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: outage_user
+      RABBITMQ_PASSWORD: outage_password
+      SMS_PARTNER_BASE_URL: http://sms-partner-mock:8081
+      SMS_PARTNER_MOCK_SCENARIO: success
+    ports:
+      - "8082:8082"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      sms-partner-mock:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8082/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  sms-partner-mock:
+    build:
+      context: ./services/sms-partner-mock
+    image: power-outage/sms-partner-mock:local
+    container_name: power-outage-sms-partner-mock
+    environment:
+      SMS_MOCK_TIMEOUT_DELAY_MS: 5000
+    ports:
+      - "8081:8081"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
   postgres:
     image: postgres:17-alpine
     container_name: power-outage-postgres

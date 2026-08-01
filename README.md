@@ -141,10 +141,20 @@ Notification Service
 - [Technical stack](docs/technical-stack.md)
 - [OpenAPI specification](docs/openapi.yaml)
 - [SMS Partner Mock OpenAPI specification](docs/sms-partner-openapi.yaml)
+- [Local deployment guide](docs/local-deployment.md)
 
 ## 14. Run the Current Version Locally
 
-Requirements:
+The simplest option requires only Docker with Docker Compose:
+
+```powershell
+docker compose up --build -d
+```
+
+This starts all three application services, PostgreSQL, and RabbitMQ. See the
+[local deployment guide](docs/local-deployment.md) for verification and shutdown steps.
+
+To run the Java services outside containers, the requirements are:
 
 - Java 21
 - Docker with Docker Compose
@@ -236,6 +246,7 @@ Outage Service -> RabbitMQ -> Notification Service -> SMS Partner Mock
 - [x] Implement the Outage Service with PostgreSQL persistence
 - [x] Implement the SMS Partner Mock
 - [x] Add RabbitMQ and the Notification Service
+- [x] Containerize all services and run the complete platform with Docker Compose
 - [ ] Add Kong and Keycloak
 - [ ] Deploy to Kubernetes using GitOps
 - [ ] Add Prometheus and Grafana
