@@ -236,6 +236,11 @@ components:
       required:
         - id
         - reportCode
+        - customerCode
+        - servicePointCode
+        - reporterName
+        - phoneNumber
+        - address
         - status
         - message
         - createdAt
@@ -246,6 +251,25 @@ components:
         reportCode:
           type: string
           example: OUT-20260801-00001
+        customerCode:
+          type: string
+          example: CUST00001
+        servicePointCode:
+          type: string
+          example: SP00001
+        reporterName:
+          type: string
+          example: Nguyen Van A
+        phoneNumber:
+          type: string
+          example: "0901234567"
+        address:
+          type: string
+          example: 123 Tran Thai Tong, Hanoi
+        description:
+          type: string
+          nullable: true
+          example: Power outage in the entire house
         status:
           type: string
           enum:

@@ -8,6 +8,12 @@ import java.util.UUID;
 public record OutageReportResponse(
         UUID id,
         String reportCode,
+        String customerCode,
+        String servicePointCode,
+        String reporterName,
+        String phoneNumber,
+        String address,
+        String description,
         String status,
         String message,
         OffsetDateTime createdAt) {
@@ -16,6 +22,12 @@ public record OutageReportResponse(
         return new OutageReportResponse(
                 report.id(),
                 report.reportCode(),
+                report.customerCode(),
+                report.servicePointCode(),
+                report.reporterName(),
+                report.phoneNumber(),
+                report.address(),
+                report.description(),
                 report.status(),
                 "The power outage report has been received.",
                 report.createdAt());
