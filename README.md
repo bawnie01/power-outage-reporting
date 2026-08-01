@@ -146,6 +146,7 @@ Notification Service
 - [Kubernetes deployment guide](docs/kubernetes-deployment.md)
 - [Continuous integration and container images](docs/continuous-integration.md)
 - [GitOps delivery](docs/gitops.md)
+- [Local kind and Argo CD lab](docs/local-gitops-lab.md)
 
 GitOps repository: [bawnie01/power-outage-reporting-gitops](https://github.com/bawnie01/power-outage-reporting-gitops)
 
@@ -262,5 +263,6 @@ Outage Service -> RabbitMQ -> Notification Service -> SMS Partner Mock
 - [x] Add Kubernetes manifests with Kustomize
 - [x] Add CI testing and container image publishing to GHCR
 - [x] Create a separate GitOps repository and Argo CD Application
-- [ ] Install Argo CD on a disposable learning cluster and synchronize the application
+- [x] Install Argo CD on a disposable kind cluster and synchronize the application
+- [x] Verify the Kubernetes workflow end to end through Kong and Keycloak
 - [ ] Add Prometheus and Grafana
