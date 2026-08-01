@@ -145,6 +145,9 @@ Notification Service
 - [API Gateway design](docs/api-gateway.md)
 - [Kubernetes deployment guide](docs/kubernetes-deployment.md)
 - [Continuous integration and container images](docs/continuous-integration.md)
+- [GitOps delivery](docs/gitops.md)
+
+GitOps repository: [bawnie01/power-outage-reporting-gitops](https://github.com/bawnie01/power-outage-reporting-gitops)
 
 ## 14. Run the Current Version Locally
 
@@ -258,5 +261,6 @@ Outage Service -> RabbitMQ -> Notification Service -> SMS Partner Mock
 - [x] Add Kong API Gateway
 - [x] Add Kubernetes manifests with Kustomize
 - [x] Add CI testing and container image publishing to GHCR
-- [ ] Deploy using GitOps and Argo CD
+- [x] Create a separate GitOps repository and Argo CD Application
+- [ ] Install Argo CD on a disposable learning cluster and synchronize the application
 - [ ] Add Prometheus and Grafana
