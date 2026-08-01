@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: power-outage
+  labels:
+    app.kubernetes.io/part-of: power-outage-reporting
+

@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kong
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kong
+  template:
+    metadata:
+      labels:
+        app: kong
+    spec:
+      initContainers:
+        - name: wait-for-outage-service
+          image: busybox:1.37
+          command: ["sh", "-c", "until nc -z outage-service 8080; do sleep 2; done"]
+      containers:
+        - name: kong
+          image: kong:3.9.3
+          ports:
+            - name: proxy
+              containerPort: 8000
+            - name: admin
+              containerPort: 8001
+          env:
+            - name: KONG_DATABASE
+              value: "off"
+            - name: KONG_DECLARATIVE_CONFIG
+              value: /kong/declarative/kong.yml
+            - name: KONG_PROXY_ACCESS_LOG
+              value: /dev/stdout
+            - name: KONG_ADMIN_ACCESS_LOG
+              value: /dev/stdout
+            - name: KONG_PROXY_ERROR_LOG
+              value: /dev/stderr
+            - name: KONG_ADMIN_ERROR_LOG
+              value: /dev/stderr
+            - name: KONG_ADMIN_LISTEN
+              value: 0.0.0.0:8001
+          readinessProbe:
+            httpGet:
+              path: /status/ready
+              port: admin
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: admin
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: declarative-config
+              mountPath: /kong/declarative/kong.yml
+              subPath: kong.yml
+              readOnly: true
+      volumes:
+        - name: declarative-config
+          configMap:
+            name: kong-declarative-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong
+spec:
+  selector:
+    app: kong
+  ports:
+    - name: proxy
+      port: 8000
+      targetPort: proxy
+    - name: admin
+      port: 8001
+      targetPort: admin
+

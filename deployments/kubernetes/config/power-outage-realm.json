@@ -1,0 +1,61 @@
+{
+  "realm": "power-outage",
+  "enabled": true,
+  "displayName": "Power Outage Reporting",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": false,
+  "roles": {
+    "realm": [
+      { "name": "CUSTOMER" },
+      { "name": "OPERATOR" },
+      { "name": "ADMIN" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "power-outage-api",
+      "name": "Power Outage API",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "protocol": "openid-connect",
+      "redirectUris": ["http://localhost:*/**"],
+      "webOrigins": ["+"]
+    }
+  ],
+  "users": [
+    {
+      "username": "customer01",
+      "enabled": true,
+      "email": "customer01@example.com",
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Customer",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "customer123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["CUSTOMER"]
+    },
+    {
+      "username": "operator01",
+      "enabled": true,
+      "email": "operator01@example.com",
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Operator",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "operator123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["OPERATOR"]
+    }
+  ]
+}

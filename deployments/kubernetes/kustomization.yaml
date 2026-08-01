@@ -1,0 +1,33 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: power-outage
+
+resources:
+  - namespace.yaml
+  - postgres.yaml
+  - rabbitmq.yaml
+  - keycloak.yaml
+  - applications.yaml
+  - kong.yaml
+
+configMapGenerator:
+  - name: keycloak-realm
+    files:
+      - power-outage-realm.json=config/power-outage-realm.json
+  - name: kong-declarative-config
+    files:
+      - kong.yml=config/kong.yml
+
+secretGenerator:
+  - name: platform-credentials
+    literals:
+      - database-username=outage_user
+      - database-password=outage_password
+      - rabbitmq-username=outage_user
+      - rabbitmq-password=outage_password
+      - keycloak-admin-username=admin
+      - keycloak-admin-password=admin
+
+generatorOptions:
+  disableNameSuffixHash: false

@@ -1,0 +1,222 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sms-partner-mock
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sms-partner-mock
+  template:
+    metadata:
+      labels:
+        app: sms-partner-mock
+    spec:
+      containers:
+        - name: sms-partner-mock
+          image: power-outage/sms-partner-mock:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8081
+          env:
+            - name: SMS_MOCK_TIMEOUT_DELAY_MS
+              value: "5000"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 384Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sms-partner-mock
+spec:
+  selector:
+    app: sms-partner-mock
+  ports:
+    - name: http
+      port: 8081
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      initContainers:
+        - name: wait-for-rabbitmq
+          image: busybox:1.37
+          command: ["sh", "-c", "until nc -z rabbitmq 5672; do sleep 2; done"]
+      containers:
+        - name: notification-service
+          image: power-outage/notification-service:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8082
+          env:
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: rabbitmq-username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: rabbitmq-password
+            - name: SMS_PARTNER_BASE_URL
+              value: http://sms-partner-mock:8081
+            - name: SMS_PARTNER_MOCK_SCENARIO
+              value: success
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 384Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+spec:
+  selector:
+    app: notification-service
+  ports:
+    - name: http
+      port: 8082
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: outage-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: outage-service
+  template:
+    metadata:
+      labels:
+        app: outage-service
+    spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.37
+          command: ["sh", "-c", "until nc -z postgres 5432; do sleep 2; done"]
+        - name: wait-for-rabbitmq
+          image: busybox:1.37
+          command: ["sh", "-c", "until nc -z rabbitmq 5672; do sleep 2; done"]
+        - name: wait-for-keycloak
+          image: busybox:1.37
+          command: ["sh", "-c", "until nc -z keycloak 8080; do sleep 2; done"]
+      containers:
+        - name: outage-service
+          image: power-outage/outage-service:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: DATABASE_URL
+              value: jdbc:postgresql://postgres:5432/outage_db
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: database-username
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: database-password
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: rabbitmq-username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: rabbitmq-password
+            - name: KEYCLOAK_ISSUER_URI
+              value: http://localhost:8083/realms/power-outage
+            - name: KEYCLOAK_JWK_SET_URI
+              value: http://keycloak:8080/realms/power-outage/protocol/openid-connect/certs
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 35
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: outage-service
+spec:
+  selector:
+    app: outage-service
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+

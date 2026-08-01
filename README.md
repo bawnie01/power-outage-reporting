@@ -143,6 +143,7 @@ Notification Service
 - [SMS Partner Mock OpenAPI specification](docs/sms-partner-openapi.yaml)
 - [Local deployment guide](docs/local-deployment.md)
 - [API Gateway design](docs/api-gateway.md)
+- [Kubernetes deployment guide](docs/kubernetes-deployment.md)
 
 ## 14. Run the Current Version Locally
 
@@ -254,5 +255,6 @@ Outage Service -> RabbitMQ -> Notification Service -> SMS Partner Mock
 - [x] Containerize all services and run the complete platform with Docker Compose
 - [x] Add Keycloak authentication and role-based authorization
 - [x] Add Kong API Gateway
-- [ ] Deploy to Kubernetes using GitOps
+- [x] Add Kubernetes manifests with Kustomize
+- [ ] Deploy using GitOps and Argo CD
 - [ ] Add Prometheus and Grafana
