@@ -1,0 +1,19 @@
+openapi: 3.0.3
+
+info:
+  title: Power Outage Reporting API
+  version: 1.0.0
+  description: API for submitting and retrieving power outage reports.
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local Kong Gateway
+
+paths: {}
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
