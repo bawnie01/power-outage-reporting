@@ -1,5 +1,5 @@
-const KEYCLOAK_TOKEN_URL = "http://localhost:8083/realms/power-outage/protocol/openid-connect/token";
-const API_URL = "http://localhost:8000/api/v1/outage-reports";
+const KEYCLOAK_TOKEN_URL = "/keycloak/realms/power-outage/protocol/openid-connect/token";
+const API_URL = "/gateway/api/v1/outage-reports";
 let accessToken = "";
 const connection = document.querySelector("#connection"), loginButton = document.querySelector("#loginButton"), submitButton = document.querySelector("#submitButton"), refreshButton = document.querySelector("#refreshButton"), reportForm = document.querySelector("#reportForm"), formMessage = document.querySelector("#formMessage"), reportRows = document.querySelector("#reportRows");
 const statusText = {RECEIVED:"Đã tiếp nhận", NOTIFIED:"Đã thông báo", NOTIFICATION_FAILED:"Thông báo thất bại"};
