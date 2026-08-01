@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
         - name: sms-partner-mock
-          image: power-outage/sms-partner-mock:local
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/bawnie01/sms-partner-mock:main
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8081
@@ -74,8 +74,8 @@ spec:
           command: ["sh", "-c", "until nc -z rabbitmq 5672; do sleep 2; done"]
       containers:
         - name: notification-service
-          image: power-outage/notification-service:local
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/bawnie01/notification-service:main
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8082
@@ -154,8 +154,8 @@ spec:
           command: ["sh", "-c", "until nc -z keycloak 8080; do sleep 2; done"]
       containers:
         - name: outage-service
-          image: power-outage/outage-service:local
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/bawnie01/outage-service:main
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8080
@@ -219,4 +219,3 @@ spec:
     - name: http
       port: 8080
       targetPort: http
-

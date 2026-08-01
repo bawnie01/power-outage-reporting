@@ -28,7 +28,7 @@ The manifests create:
 The example credentials are intentionally limited to local demonstration. Use
 an external secret manager or encrypted secrets outside a learning environment.
 
-## 1. Build the Application Images
+## 1. Verify the Container Images
 
 First verify that `kubectl` points to a disposable local learning cluster:
 
@@ -41,24 +41,16 @@ Do not apply these learning manifests to a shared, corporate, staging, or
 production cluster. Switch to a local Rancher Desktop, Docker Desktop, kind, or
 Minikube context before continuing.
 
-From the repository root:
-
-```powershell
-docker compose build
-```
-
 The manifests reference these images:
 
 ```text
-power-outage/outage-service:local
-power-outage/notification-service:local
-power-outage/sms-partner-mock:local
+ghcr.io/bawnie01/outage-service:main
+ghcr.io/bawnie01/notification-service:main
+ghcr.io/bawnie01/sms-partner-mock:main
 ```
 
-If the Kubernetes cluster uses a separate container runtime, load these images
-into that cluster or push them to a container registry before deployment.
-Remote clusters cannot access images that exist only on the developer's
-computer; replace the three image names with registry URLs in that case.
+The GitHub Actions workflow builds and publishes these images. Ensure all three
+packages are public before deployment, or configure an `imagePullSecret`.
 
 ## 2. Preview and Validate the Manifests
 

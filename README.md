@@ -144,6 +144,7 @@ Notification Service
 - [Local deployment guide](docs/local-deployment.md)
 - [API Gateway design](docs/api-gateway.md)
 - [Kubernetes deployment guide](docs/kubernetes-deployment.md)
+- [Continuous integration and container images](docs/continuous-integration.md)
 
 ## 14. Run the Current Version Locally
 
@@ -256,5 +257,6 @@ Outage Service -> RabbitMQ -> Notification Service -> SMS Partner Mock
 - [x] Add Keycloak authentication and role-based authorization
 - [x] Add Kong API Gateway
 - [x] Add Kubernetes manifests with Kustomize
+- [x] Add CI testing and container image publishing to GHCR
 - [ ] Deploy using GitOps and Argo CD
 - [ ] Add Prometheus and Grafana
