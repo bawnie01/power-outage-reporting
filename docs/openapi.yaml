@@ -83,6 +83,75 @@ paths:
         "500":
           $ref: "#/components/responses/InternalServerError"
 
+    get:
+      tags: [Outage Reports]
+      summary: List outage reports
+      description: Returns reports in reverse creation order. Restricted to OPERATOR and ADMIN.
+      operationId: listOutageReports
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [RECEIVED]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: A page of outage reports.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OutageReportPageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /outage-reports/{reportId}:
+    get:
+      tags: [Outage Reports]
+      summary: Get an outage report
+      operationId: getOutageReport
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: The requested outage report.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OutageReportResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -190,6 +259,26 @@ components:
           format: date-time
           example: "2026-08-01T09:30:00+07:00"
 
+    OutageReportPageResponse:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/OutageReportResponse"
+        page:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 1
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
     ValidationErrorDetail:
       type: object
       required:
@@ -270,6 +359,12 @@ components:
             $ref: "#/components/schemas/ErrorResponse"
     Conflict:
       description: The idempotency key was reused with different request data.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: The requested outage report does not exist.
       content:
         application/json:
           schema:

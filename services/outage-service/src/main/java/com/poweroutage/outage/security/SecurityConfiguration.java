@@ -11,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.http.HttpMethod;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,8 +26,12 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/health/**", "/actuator/info", "/actuator/prometheus").permitAll()
-                        .requestMatchers("/api/v1/outage-reports/**")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/outage-reports")
                         .hasAnyRole("CUSTOMER", "OPERATOR")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/outage-reports")
+                        .hasAnyRole("OPERATOR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/outage-reports/**")
+                        .hasAnyRole("CUSTOMER", "OPERATOR", "ADMIN")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(keycloakRoleConverter())))

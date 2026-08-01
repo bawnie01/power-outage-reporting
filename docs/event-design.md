@@ -2,7 +2,7 @@
 
 ## Outage Reported Event
 
-The Outage Service publishes this event after the outage report database transaction commits.
+The Outage Service writes this event to a transactional outbox in the same database transaction as the outage report.
 
 | Property | Value |
 |---|---|
@@ -34,8 +34,8 @@ The Outage Service publishes this event after the outage report database transac
 ## Processing Flow
 
 1. The Outage Service stores the report in PostgreSQL.
-2. The database transaction commits.
-3. The Outage Service publishes `outage.reported`.
+2. The transaction commits the report and its outbox event atomically.
+3. The outbox publisher sends pending `outage.reported` events and marks successful publications.
 4. RabbitMQ routes the event to the notification queue.
 5. The Notification Service consumes the event.
 6. The Notification Service calls the SMS Partner Mock.
@@ -51,4 +51,4 @@ The Outage Service publishes this event after the outage report database transac
 
 ## Delivery Semantics
 
-RabbitMQ provides at-least-once delivery for this workflow. A consumer may therefore receive the same event more than once. Persistent duplicate-event storage will be added with the notification log in a later milestone.
+RabbitMQ and the outbox publisher provide at-least-once delivery. A crash after publishing but before marking the outbox row can produce a duplicate. The Notification Service therefore stores each successfully processed `eventId` in `processed_notification_event`. A duplicate delivery is acknowledged without calling the SMS partner again.

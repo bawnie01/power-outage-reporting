@@ -15,6 +15,12 @@ paths:
       summary: Send a simulated SMS message
       operationId: sendSmsMessage
       parameters:
+        - name: X-Partner-Api-Key
+          in: header
+          required: true
+          description: Shared lab credential supplied through a secret. Use OAuth2 client credentials or mTLS in production.
+          schema:
+            type: string
         - name: X-Mock-Scenario
           in: header
           required: false
@@ -53,6 +59,12 @@ paths:
                 acceptedAt: "2026-08-01T09:30:05+07:00"
         "400":
           description: The request or mock scenario is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartnerErrorResponse"
+        "401":
+          description: Partner API key is missing or invalid.
           content:
             application/json:
               schema:

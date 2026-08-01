@@ -2,14 +2,21 @@ package com.poweroutage.outage.application;
 
 import com.poweroutage.outage.api.CreateOutageReportRequest;
 import com.poweroutage.outage.common.IdempotencyConflictException;
+import com.poweroutage.outage.common.OutageReportNotFoundException;
 import com.poweroutage.outage.domain.OutageReport;
 import com.poweroutage.outage.domain.OutageReportRepository;
 import com.poweroutage.outage.messaging.OutageReportedData;
 import com.poweroutage.outage.messaging.OutageReportedEvent;
+import com.poweroutage.outage.messaging.OutboxEvent;
+import com.poweroutage.outage.messaging.OutboxEventRepository;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -21,7 +28,6 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.HexFormat;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class OutageReportService {
@@ -29,23 +35,26 @@ public class OutageReportService {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.BASIC_ISO_DATE;
 
     private final OutageReportRepository repository;
-    private final ApplicationEventPublisher eventPublisher;
+    private final OutboxEventRepository outboxRepository;
+    private final ObjectMapper objectMapper;
     private final Clock clock;
-    private final AtomicLong sequence = new AtomicLong();
 
     @Autowired
     public OutageReportService(
             OutageReportRepository repository,
-            ApplicationEventPublisher eventPublisher) {
-        this(repository, eventPublisher, Clock.system(ZoneOffset.UTC));
+            OutboxEventRepository outboxRepository,
+            ObjectMapper objectMapper) {
+        this(repository, outboxRepository, objectMapper, Clock.system(ZoneOffset.UTC));
     }
 
     OutageReportService(
             OutageReportRepository repository,
-            ApplicationEventPublisher eventPublisher,
+            OutboxEventRepository outboxRepository,
+            ObjectMapper objectMapper,
             Clock clock) {
         this.repository = repository;
-        this.eventPublisher = eventPublisher;
+        this.outboxRepository = outboxRepository;
+        this.objectMapper = objectMapper;
         this.clock = clock;
     }
 
@@ -61,6 +70,18 @@ public class OutageReportService {
                     return existing;
                 })
                 .orElseGet(() -> createAndPublish(idempotencyKey, fingerprint, request));
+    }
+
+    @Transactional(readOnly = true)
+    public OutageReport get(UUID id) {
+        return repository.findById(id).orElseThrow(() -> new OutageReportNotFoundException(id));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<OutageReport> list(String status, int page, int size) {
+        return repository.findAll(
+                status,
+                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
     }
 
     private OutageReport createAndPublish(
@@ -80,7 +101,7 @@ public class OutageReportService {
                         request.description(),
                         "RECEIVED",
                         OffsetDateTime.now(clock)));
-        eventPublisher.publishEvent(new OutageReportedEvent(
+        OutageReportedEvent event = new OutageReportedEvent(
                 UUID.randomUUID(),
                 "outage.reported",
                 "1.0",
@@ -90,14 +111,24 @@ public class OutageReportService {
                         report.id(),
                         report.reportCode(),
                         report.phoneNumber(),
-                        report.status())));
+                        report.status()));
+        try {
+            outboxRepository.save(new OutboxEvent(
+                    event.eventId(),
+                    report.id(),
+                    event.eventType(),
+                    objectMapper.writeValueAsString(event),
+                    event.occurredAt()));
+        } catch (JacksonException exception) {
+            throw new IllegalStateException("Could not serialize the outage event", exception);
+        }
         return report;
     }
 
     private String nextReportCode() {
         return "OUT-%s-%05d".formatted(
                 LocalDate.now(clock).format(DATE_FORMAT),
-                sequence.incrementAndGet());
+                repository.nextReportSequence());
     }
 
     private String fingerprint(CreateOutageReportRequest request) {

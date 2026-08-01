@@ -40,6 +40,14 @@ public class PartnerExceptionHandler {
                 exception.getMessage(), List.of(), request);
     }
 
+    @ExceptionHandler(InvalidPartnerCredentialException.class)
+    public ResponseEntity<PartnerErrorResponse> handleInvalidCredential(
+            InvalidPartnerCredentialException exception,
+            HttpServletRequest request) {
+        return error(HttpStatus.UNAUTHORIZED, "INVALID_PARTNER_CREDENTIAL",
+                exception.getMessage(), List.of(), request);
+    }
+
     private ResponseEntity<PartnerErrorResponse> error(
             HttpStatus status,
             String code,

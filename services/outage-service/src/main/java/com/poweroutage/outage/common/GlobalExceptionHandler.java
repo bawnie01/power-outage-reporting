@@ -33,6 +33,22 @@ public class GlobalExceptionHandler {
                 exception.getMessage(), List.of(), request);
     }
 
+    @ExceptionHandler(OutageReportNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(
+            OutageReportNotFoundException exception,
+            HttpServletRequest request) {
+        return error(HttpStatus.NOT_FOUND, "OUTAGE_REPORT_NOT_FOUND",
+                exception.getMessage(), List.of(), request);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidParameter(
+            IllegalArgumentException exception,
+            HttpServletRequest request) {
+        return error(HttpStatus.BAD_REQUEST, "INVALID_QUERY_PARAMETER",
+                exception.getMessage(), List.of(), request);
+    }
+
     private ResponseEntity<ErrorResponse> error(
             HttpStatus status,
             String code,

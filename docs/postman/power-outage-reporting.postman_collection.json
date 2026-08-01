@@ -1,0 +1,112 @@
+{
+  "info": {
+    "name": "Power Outage Reporting System",
+    "description": "Runnable collection for authentication, outage report APIs, idempotency, and the SMS partner mock.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "keycloakBaseUrl", "value": "http://localhost:8083"},
+    {"key": "gatewayBaseUrl", "value": "http://localhost:8000"},
+    {"key": "partnerBaseUrl", "value": "http://localhost:8081"},
+    {"key": "username", "value": "operator01"},
+    {"key": "password", "value": "operator123"},
+    {"key": "accessToken", "value": ""},
+    {"key": "reportId", "value": ""},
+    {"key": "idempotencyKey", "value": "c1203d7d-a58f-45ea-b9ec-469d77b24871"},
+    {"key": "partnerApiKey", "value": "local-demo-partner-key"}
+  ],
+  "item": [
+    {
+      "name": "1 - Obtain operator token",
+      "event": [{"listen": "test", "script": {"exec": [
+        "pm.test('Token request succeeds', () => pm.response.to.have.status(200));",
+        "pm.collectionVariables.set('accessToken', pm.response.json().access_token);"
+      ]}}],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/x-www-form-urlencoded"}],
+        "body": {"mode": "urlencoded", "urlencoded": [
+          {"key": "grant_type", "value": "password"},
+          {"key": "client_id", "value": "power-outage-api"},
+          {"key": "username", "value": "{{username}}"},
+          {"key": "password", "value": "{{password}}"}
+        ]},
+        "url": "{{keycloakBaseUrl}}/realms/power-outage/protocol/openid-connect/token"
+      }
+    },
+    {
+      "name": "2 - Create outage report",
+      "event": [{"listen": "test", "script": {"exec": [
+        "pm.test('Report is created', () => pm.response.to.have.status(201));",
+        "pm.collectionVariables.set('reportId', pm.response.json().id);"
+      ]}}],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{accessToken}}"},
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Idempotency-Key", "value": "{{idempotencyKey}}"}
+        ],
+        "body": {"mode": "raw", "raw": "{\n  \"customerCode\": \"CUST00001\",\n  \"servicePointCode\": \"SP00001\",\n  \"reporterName\": \"Nguyen Van A\",\n  \"phoneNumber\": \"0901234567\",\n  \"address\": \"123 Tran Thai Tong, Hanoi\",\n  \"description\": \"Power outage in the entire house\"\n}"},
+        "url": "{{gatewayBaseUrl}}/api/v1/outage-reports"
+      }
+    },
+    {
+      "name": "3 - Replay idempotent request",
+      "event": [{"listen": "test", "script": {"exec": [
+        "pm.test('Replay returns the existing report', () => pm.response.to.have.status(201));",
+        "pm.test('Report ID is unchanged', () => pm.expect(pm.response.json().id).to.eql(pm.collectionVariables.get('reportId')));"
+      ]}}],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{accessToken}}"},
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Idempotency-Key", "value": "{{idempotencyKey}}"}
+        ],
+        "body": {"mode": "raw", "raw": "{\n  \"customerCode\": \"CUST00001\",\n  \"servicePointCode\": \"SP00001\",\n  \"reporterName\": \"Nguyen Van A\",\n  \"phoneNumber\": \"0901234567\",\n  \"address\": \"123 Tran Thai Tong, Hanoi\",\n  \"description\": \"Power outage in the entire house\"\n}"},
+        "url": "{{gatewayBaseUrl}}/api/v1/outage-reports"
+      }
+    },
+    {
+      "name": "4 - Get outage report",
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('Report is returned', () => pm.response.to.have.status(200));"]}}],
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+        "url": "{{gatewayBaseUrl}}/api/v1/outage-reports/{{reportId}}"
+      }
+    },
+    {
+      "name": "5 - List outage reports",
+      "event": [{"listen": "test", "script": {"exec": [
+        "pm.test('Page is returned', () => pm.response.to.have.status(200));",
+        "pm.test('Response is paginated', () => pm.expect(pm.response.json()).to.have.keys('content','page','size','totalElements','totalPages'));"
+      ]}}],
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+        "url": "{{gatewayBaseUrl}}/api/v1/outage-reports?status=RECEIVED&page=0&size=20"
+      }
+    },
+    {
+      "name": "6 - Reject request without token",
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('Authentication is required', () => pm.response.to.have.status(401));"]}}],
+      "request": {"method": "GET", "url": "{{gatewayBaseUrl}}/api/v1/outage-reports/{{reportId}}"}
+    },
+    {
+      "name": "7 - Call SMS partner mock",
+      "event": [{"listen": "test", "script": {"exec": ["pm.test('Partner accepts the message', () => pm.response.to.have.status(202));"]}}],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "X-Partner-Api-Key", "value": "{{partnerApiKey}}"},
+          {"key": "X-Mock-Scenario", "value": "success"}
+        ],
+        "body": {"mode": "raw", "raw": "{\n  \"phoneNumber\": \"0901234567\",\n  \"templateCode\": \"OUTAGE_REPORT_RECEIVED\",\n  \"parameters\": {\"reportCode\": \"OUT-20260801-00001\"}\n}"},
+        "url": "{{partnerBaseUrl}}/partner/v1/sms-messages"
+      }
+    }
+  ]
+}

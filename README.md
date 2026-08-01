@@ -230,6 +230,7 @@ Example success request:
 ```powershell
 curl.exe -X POST http://localhost:8081/partner/v1/sms-messages `
   -H "Content-Type: application/json" `
+  -H "X-Partner-Api-Key: local-demo-partner-key" `
   -H "X-Mock-Scenario: success" `
   -d '{"phoneNumber":"0901234567","templateCode":"OUTAGE_REPORT_RECEIVED","parameters":{"reportCode":"OUT-20260801-00001"}}'
 ```
@@ -266,3 +267,6 @@ Outage Service -> RabbitMQ -> Notification Service -> SMS Partner Mock
 - [x] Install Argo CD on a disposable kind cluster and synchronize the application
 - [x] Verify the Kubernetes workflow end to end through Kong and Keycloak
 - [x] Add Prometheus and Grafana with a provisioned platform dashboard
+- [x] Add transactional outbox and persistent consumer idempotency
+- [x] Add report retrieval, pagination, and status filtering
+- [x] Add EVNICT mapping, architecture review, and Postman collection

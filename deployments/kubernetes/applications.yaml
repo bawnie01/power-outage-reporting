@@ -22,6 +22,11 @@ spec:
           env:
             - name: SMS_MOCK_TIMEOUT_DELAY_MS
               value: "5000"
+            - name: SMS_PARTNER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: sms-partner-api-key
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
@@ -69,6 +74,9 @@ spec:
         app: notification-service
     spec:
       initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.37
+          command: ["sh", "-c", "until nc -z postgres 5432; do sleep 2; done"]
         - name: wait-for-rabbitmq
           image: busybox:1.37
           command: ["sh", "-c", "until nc -z rabbitmq 5672; do sleep 2; done"]
@@ -80,6 +88,18 @@ spec:
             - name: http
               containerPort: 8082
           env:
+            - name: DATABASE_URL
+              value: jdbc:postgresql://postgres:5432/outage_db
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: database-username
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: database-password
             - name: RABBITMQ_HOST
               value: rabbitmq
             - name: RABBITMQ_PORT
@@ -98,6 +118,11 @@ spec:
               value: http://sms-partner-mock:8081
             - name: SMS_PARTNER_MOCK_SCENARIO
               value: success
+            - name: SMS_PARTNER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: sms-partner-api-key
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness

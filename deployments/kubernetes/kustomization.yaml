@@ -29,6 +29,7 @@ secretGenerator:
       - rabbitmq-password=outage_password
       - keycloak-admin-username=admin
       - keycloak-admin-password=admin
+      - sms-partner-api-key=local-demo-partner-key
 
 generatorOptions:
   disableNameSuffixHash: false
