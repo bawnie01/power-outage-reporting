@@ -73,6 +73,7 @@ POST /api/v1/outage-reports
   "message": "The power outage report has been received."
 }
 
+## 8. Partner Mock API
 POST /partner/v1/sms-messages
 {
   "phoneNumber": "0901234567",
@@ -81,7 +82,8 @@ POST /partner/v1/sms-messages
     "reportCode": "OUT-20260801-00001"
   }
 }
-9. Technology Stack
+
+## 9. Technology Stack
 Java 21
 Spring Boot
 PostgreSQL
@@ -94,7 +96,8 @@ Argo CD
 Prometheus
 Grafana
 GitHub Actions
-10. Architecture
+
+## 10. Architecture
 Customer / Postman
         |
         v
@@ -113,12 +116,14 @@ Notification Service
         |
         v
  SMS Partner Mock
-11. Security
+
+## 11. Security
 Keycloak provides authentication and access tokens.
 Kong acts as the API Gateway.
 The backend validates JWT access tokens.
 Secrets are not stored in the source repository.
-12. Observability
+
+## 12. Observability
 Prometheus collects application metrics.
 Grafana displays dashboards.
 Health-check endpoints are exposed by Spring Boot Actuator.
